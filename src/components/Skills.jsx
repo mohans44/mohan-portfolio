@@ -20,7 +20,7 @@ const iconMap = {
 const Skills = () => {
     return (
         <Section id="skills">
-            <h2 style={{ marginBottom: '50px', fontSize: '2.5rem', fontWeight: 700, letterSpacing: '-0.03em' }}>Technical Expertise</h2>
+            <h2 style={{ marginBottom: '50px', fontSize: '2rem', fontWeight: 700, letterSpacing: '-0.03em' }}>Technical Expertise</h2>
 
             <div className="skills-grid" style={{ gap: '30px' }}>
                 {skills.map((category, index) => (

@@ -12,7 +12,7 @@ const Experience = () => {
                         <div style={{ padding: '10px', backgroundColor: 'var(--card-bg)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                             <Briefcase size={20} />
                         </div>
-                        <h2 style={{ fontSize: '1.5rem' }}>Experience</h2>
+                        <h2 style={{ fontSize: '2rem' }}>Experience</h2>
                     </div>
 
                     {experience.map((exp, index) => (
@@ -38,7 +38,7 @@ const Experience = () => {
                         <div style={{ padding: '10px', backgroundColor: 'var(--card-bg)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                             <GraduationCap size={20} />
                         </div>
-                        <h2 style={{ fontSize: '1.5rem' }}>Education</h2>
+                        <h2 style={{ fontSize: '2rem' }}>Education</h2>
                     </div>
 
                     {education.map((edu, index) => (
