@@ -36,8 +36,8 @@ const Header = ({ openResume }) => {
     };
 
     const navLinks = [
-        { name: 'Work', href: '#projects' },
         { name: 'Skills', href: '#skills' },
+        { name: 'Work', href: '#projects' },
         { name: 'Writing', href: '#blogs' },
         { name: 'Contact', href: '#contact' },
     ];
