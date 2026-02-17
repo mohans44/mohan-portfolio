@@ -1,32 +1,127 @@
-import { useState } from 'react';
-import Header from './components/Header';
-import BentoIntro from './components/BentoIntro';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import Skills from './components/Skills';
-import Blogs from './components/Blogs';
-import Contact from './components/Contact';
-import ResumeModal from './components/ResumeModal';
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import Header from './components/layout/Header';
+import HomeIntroSection from './components/sections/HomeIntroSection';
+import AboutSection from './components/sections/AboutSection';
+import WorkSection from './components/sections/WorkSection';
+import JourneySection from './components/sections/JourneySection';
+import BlogSection from './components/sections/BlogSection';
+import ContactSection from './components/sections/ContactSection';
+import ResumeModal from './components/common/ResumeModal';
 import './App.css';
+
+const MotionDiv = motion.div;
+const pages = ['home', 'work', 'blog'];
 
 function App() {
   const [showResume, setShowResume] = useState(false);
+  const [activePage, setActivePage] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return pages.includes(hash) ? hash : 'home';
+  });
+  const homeRef = useRef(null);
+  const workRef = useRef(null);
+  const blogRef = useRef(null);
 
-  const openResume = () => setShowResume(true);
-  const closeResume = () => setShowResume(false);
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (pages.includes(hash)) {
+        setActivePage(hash);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    if (activePage !== 'home') {
+      window.location.hash = activePage;
+    } else {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [activePage]);
+
+  const changePage = (pageId) => {
+    if (!pages.includes(pageId)) return;
+    setActivePage(pageId);
+  };
 
   return (
-    <div className="app">
-      <Header openResume={openResume} />
-      <main>
-        <BentoIntro openResume={openResume} />
-        <Skills />
-        <Projects />
-        <Experience />
-        <Blogs />
-        <Contact />
+    <div className={activePage === 'work' ? 'app-shell work-mode' : 'app-shell'}>
+      <MotionDiv
+        className="ambient ambient-one"
+        aria-hidden="true"
+        animate={{ opacity: [0.2, 0.36, 0.2], scale: [1, 1.08, 1] }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <MotionDiv
+        className="ambient ambient-two"
+        aria-hidden="true"
+        animate={{ opacity: [0.18, 0.32, 0.18], scale: [1.04, 1, 1.04] }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+      />
+
+      <Header
+        activePage={activePage}
+        onPageChange={changePage}
+      />
+
+      <main className={activePage === 'home' ? 'site-main home-main' : 'site-main'}>
+        <AnimatePresence mode="wait">
+          {activePage === 'home' && (
+            <MotionDiv
+              className="page-view page-layer home-page-view"
+              ref={homeRef}
+              key="home-page"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <HomeIntroSection
+                openResume={() => setShowResume(true)}
+                onOpenWork={() => changePage('work')}
+              />
+              <AboutSection />
+              <JourneySection />
+              <ContactSection />
+            </MotionDiv>
+          )}
+
+          {activePage === 'work' && (
+            <MotionDiv
+              className="page-view page-layer projects-page-view"
+              ref={workRef}
+              key="work-page"
+              initial={{ clipPath: 'inset(0 0 100% 0)', y: 26, scale: 0.985 }}
+              animate={{ clipPath: 'inset(0 0 0% 0)', y: 0, scale: 1 }}
+              exit={{ clipPath: 'inset(100% 0 0 0)', y: -18, scale: 1.01 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <WorkSection />
+            </MotionDiv>
+          )}
+
+          {activePage === 'blog' && (
+            <MotionDiv
+              className="page-view page-layer blog-page-view"
+              ref={blogRef}
+              key="blog-page"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <BlogSection />
+            </MotionDiv>
+          )}
+        </AnimatePresence>
       </main>
-      <ResumeModal isOpen={showResume} onClose={closeResume} />
+
+      <ResumeModal isOpen={showResume} onClose={() => setShowResume(false)} />
     </div>
   );
 }
