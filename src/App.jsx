@@ -15,6 +15,9 @@ const pages = ['home', 'work', 'blog'];
 
 function App() {
   const [showResume, setShowResume] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false,
+  );
   const [activePage, setActivePage] = useState(() => {
     const hash = window.location.hash.replace('#', '');
     return pages.includes(hash) ? hash : 'home';
@@ -24,6 +27,16 @@ function App() {
   const blogRef = useRef(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia('(max-width: 768px)');
+    const onChange = (event) => setIsMobile(event.matches);
+    setIsMobile(media.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return undefined;
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
       if (pages.includes(hash)) {
@@ -33,24 +46,36 @@ function App() {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
+    if (isMobile) {
+      window.history.replaceState(null, '', window.location.pathname);
+      return;
+    }
     window.scrollTo({ top: 0, behavior: 'auto' });
     if (activePage !== 'home') {
       window.location.hash = activePage;
     } else {
       window.history.replaceState(null, '', window.location.pathname);
     }
-  }, [activePage]);
+  }, [activePage, isMobile]);
 
   const changePage = (pageId) => {
     if (!pages.includes(pageId)) return;
     setActivePage(pageId);
   };
 
+  const openWork = () => {
+    if (isMobile) {
+      document.getElementById('work')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    changePage('work');
+  };
+
   return (
-    <div className={activePage === 'work' ? 'app-shell work-mode' : 'app-shell'}>
+    <div className={!isMobile && activePage === 'work' ? 'app-shell work-mode' : 'app-shell'}>
       <MotionDiv
         className="ambient ambient-one"
         aria-hidden="true"
@@ -69,56 +94,77 @@ function App() {
         onPageChange={changePage}
       />
 
-      <main className={activePage === 'home' ? 'site-main home-main' : 'site-main'}>
-        <AnimatePresence mode="wait">
-          {activePage === 'home' && (
-            <MotionDiv
-              className="page-view page-layer home-page-view"
-              ref={homeRef}
-              key="home-page"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <HomeIntroSection
-                openResume={() => setShowResume(true)}
-                onOpenWork={() => changePage('work')}
-              />
-              <AboutSection />
-              <JourneySection />
-              <ContactSection />
-            </MotionDiv>
-          )}
+      <main className={isMobile || activePage === 'home' ? 'site-main home-main' : 'site-main'}>
+        {isMobile ? (
+          <MotionDiv
+            className="page-view page-layer home-page-view"
+            ref={homeRef}
+            key="mobile-page"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <HomeIntroSection
+              openResume={() => setShowResume(true)}
+              onOpenWork={openWork}
+            />
+            <AboutSection />
+            <WorkSection />
+            <JourneySection />
+            <BlogSection />
+            <ContactSection />
+          </MotionDiv>
+        ) : (
+          <AnimatePresence mode="wait">
+            {activePage === 'home' && (
+              <MotionDiv
+                className="page-view page-layer home-page-view"
+                ref={homeRef}
+                key="home-page"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <HomeIntroSection
+                  openResume={() => setShowResume(true)}
+                  onOpenWork={openWork}
+                />
+                <AboutSection />
+                <JourneySection />
+                <ContactSection />
+              </MotionDiv>
+            )}
 
-          {activePage === 'work' && (
-            <MotionDiv
-              className="page-view page-layer projects-page-view"
-              ref={workRef}
-              key="work-page"
-              initial={{ clipPath: 'inset(0 0 100% 0)', y: 26, scale: 0.985 }}
-              animate={{ clipPath: 'inset(0 0 0% 0)', y: 0, scale: 1 }}
-              exit={{ clipPath: 'inset(100% 0 0 0)', y: -18, scale: 1.01 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <WorkSection />
-            </MotionDiv>
-          )}
+            {activePage === 'work' && (
+              <MotionDiv
+                className="page-view page-layer projects-page-view"
+                ref={workRef}
+                key="work-page"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <WorkSection />
+              </MotionDiv>
+            )}
 
-          {activePage === 'blog' && (
-            <MotionDiv
-              className="page-view page-layer blog-page-view"
-              ref={blogRef}
-              key="blog-page"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <BlogSection />
-            </MotionDiv>
-          )}
-        </AnimatePresence>
+            {activePage === 'blog' && (
+              <MotionDiv
+                className="page-view page-layer blog-page-view"
+                ref={blogRef}
+                key="blog-page"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <BlogSection />
+              </MotionDiv>
+            )}
+          </AnimatePresence>
+        )}
       </main>
 
       <ResumeModal isOpen={showResume} onClose={() => setShowResume(false)} />

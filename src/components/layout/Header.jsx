@@ -13,10 +13,21 @@ const navLinks = [
 
 const Header = ({ activePage, onPageChange }) => {
   const [now, setNow] = useState(() => new Date());
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false,
+  );
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia('(max-width: 768px)');
+    const onChange = (event) => setIsMobile(event.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
   }, []);
 
   const dateText = useMemo(
@@ -24,7 +35,13 @@ const Header = ({ activePage, onPageChange }) => {
     [now],
   );
   const timeText = useMemo(
-    () => new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }).format(now) + " IST",
+    () =>
+      new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      }).format(now) + " IST",
     [now],
   );
 
@@ -61,29 +78,31 @@ const Header = ({ activePage, onPageChange }) => {
               MSS.
             </button>
 
-            <nav className="site-nav" aria-label="Primary navigation">
-              {navLinks.map((link) => (
-                <button
-                  key={link.id}
-                  type="button"
-                  className={activePage === link.id ? "nav-link active" : "nav-link"}
-                  onClick={() => onPageChange(link.id)}
-                >
-                  {activePage === link.id && (
-                    <MotionSpan
-                      layoutId="active-pill"
-                      className="active-pill-bg"
-                      transition={{ duration: 0 }}
-                    />
-                  )}
-                  {link.label}
-                </button>
-              ))}
-            </nav>
+            {!isMobile && (
+              <nav className="site-nav" aria-label="Primary navigation">
+                {navLinks.map((link) => (
+                  <button
+                    key={link.id}
+                    type="button"
+                    className={activePage === link.id ? "nav-link active" : "nav-link"}
+                    onClick={() => onPageChange(link.id)}
+                  >
+                    {activePage === link.id && (
+                      <MotionSpan
+                        layoutId="active-pill"
+                        className="active-pill-bg"
+                        transition={{ duration: 0 }}
+                      />
+                    )}
+                    {link.label}
+                  </button>
+                ))}
+              </nav>
+            )}
 
             <div className="header-actions">
               <span className="header-meta">
-                {dateText} · {timeText}
+                {isMobile ? timeText : `${dateText} · ${timeText}`}
               </span>
             </div>
           </MotionDiv>

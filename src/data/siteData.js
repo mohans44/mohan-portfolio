@@ -1,21 +1,25 @@
-import feedFocus01 from '../assets/feedfocus/01.png';
-import feedFocus02 from '../assets/feedfocus/02.png';
-import feedFocus03 from '../assets/feedfocus/03.png';
-import feedFocus04 from '../assets/feedfocus/04.png';
-import gguUniPass01 from '../assets/gguunipass/01.png';
-import gguUniPass02 from '../assets/gguunipass/02.png';
-import gguUniPass03 from '../assets/gguunipass/03.png';
-import jobFinder01 from '../assets/jobfinder/01.png';
-import jobFinder02 from '../assets/jobfinder/02.png';
-import jobFinder03 from '../assets/jobfinder/03.png';
-import movieVault01 from '../assets/movievault/01.png';
-import movieVault02 from '../assets/movievault/02.png';
-import movieVault03 from '../assets/movievault/03.png';
-import resumePdf from '../assets/mohan_resume_sde.pdf';
+import feedFocus01 from "../assets/feedfocus/01.png";
+import feedFocus02 from "../assets/feedfocus/02.png";
+import feedFocus03 from "../assets/feedfocus/03.png";
+import feedFocus04 from "../assets/feedfocus/04.png";
+import gguUniPass01 from "../assets/gguunipass/01.png";
+import gguUniPass02 from "../assets/gguunipass/02.png";
+import gguUniPass03 from "../assets/gguunipass/03.png";
+import jobFinder01 from "../assets/jobfinder/01.png";
+import jobFinder02 from "../assets/jobfinder/02.png";
+import jobFinder03 from "../assets/jobfinder/03.png";
+import flickDeck01 from "../assets/flickdeck/01.png";
+import flickDeck02 from "../assets/flickdeck/02.png";
+import flickDeck03 from "../assets/flickdeck/03.png";
+import flickDeck04 from "../assets/flickdeck/04.png";
+import flickDeck05 from "../assets/flickdeck/05.png";
+import flickDeck06 from "../assets/flickdeck/06.png";
+import flickDeck07 from "../assets/flickdeck/07.png";
+import resumePdf from "../assets/mohan_resume_sde.pdf";
 
 export const header = {
   name: "Mohan Seetha",
-  title: "Full Stack Developer",
+  title: "Software Developer",
   socials: [
     {
       label: "GitHub",
@@ -45,14 +49,25 @@ export const bio = `
 I am a final-year Computer Science (AI/ML) student who enjoys building software that is practical, scalable, and cleanly engineered. My core focus is full-stack development with React, Node.js, Express, Spring Boot, and modern data layers, and I like owning the full flow from product idea to shipped implementation. I have worked on systems ranging from high-volume news aggregation and recommendation engines to campus workflow automation used by real users every day. Across these builds, I consistently focus on performance, reliability, and developer-friendly architecture, whether that means improving API response paths, designing better data retrieval patterns, or simplifying complex user journeys. I am especially motivated by projects where strong engineering can directly remove friction for people, and I care deeply about writing maintainable code that scales with both usage and team growth.
 `;
 
+export const bioMobile = `
+Final-year CSE (AI/ML) student focused on building practical full-stack products with React, Node.js, Express, and Spring Boot. I enjoy shipping end-to-end systems with clean architecture, strong performance, and user-first workflows.
+`;
+
 export const aboutKeyPoints = [
   "I built Feed Focus to process 10K+ daily articles from 150+ feeds, with topic-driven relevance and performance-first API design.",
-  "I shipped Movie Vault as a full-stack product with personalized recommendations and optimization work for faster search and retrieval.",
+  "I shipped Flick Deck as a full-stack product with personalized recommendations and optimization work for faster search and retrieval.",
   "I delivered campus automation tools during my internship, including hall-ticket and gate-pass workflows used by 2,000+ students.",
   "I enjoy building systems end-to-end: backend architecture, database modeling, API design, frontend UX, and deployment polish.",
   "I prioritize measurable engineering outcomes like lower latency, cleaner architecture, and simpler user workflows.",
   "My stack includes Python, Java, JavaScript, React, Node.js, Express, Spring Boot, MySQL, and MongoDB.",
   "I am currently completing B.Tech in CSE (AI/ML) with an 8.8 CGPA and strong fundamentals in DSA, OS, DBMS, CN, and ML.",
+];
+
+export const aboutKeyPointsMobile = [
+  "Built Feed Focus to process 10K+ daily articles across 150+ feeds with performance-focused API design.",
+  "Shipped Flick Deck end-to-end with personalized recommendations and faster retrieval.",
+  "Builds systems end-to-end: backend architecture, database modeling, APIs, frontend UX, and deployment.",
+  "Focuses on measurable outcomes like lower latency, cleaner architecture, and simpler workflows.",
 ];
 
 export const blogs = [
@@ -94,28 +109,37 @@ export const experience = [
 
 export const work = [
   {
-    name: "Movie Vault",
+    name: "Flick Deck",
     desc: "Personalized movie journal with a recommendation engine. Handles 1M+ records with sub-second search latency.",
     keyPoint: "Recommendation engine tuned for fast, personal picks at scale.",
-    github: "https://github.com/mohans44/movie-vault",
-    live: "https://movie-vault-web.vercel.app/",
+    github: "https://github.com/mohans44/flickdeck",
+    live: "https://flickdeck.vercel.app/",
     tech: ["MERN Stack", "TailwindCSS", "Scikit-Learn"],
     featured: true,
-    screenshots: [movieVault01, movieVault02, movieVault03],
+    screenshots: [
+      flickDeck01,
+      flickDeck02,
+      flickDeck03,
+      flickDeck04,
+      flickDeck05,
+      flickDeck06,
+      flickDeck07,
+    ],
   },
   {
     name: "Feed Focus",
     desc: "A high-scale news aggregator processing 10,000+ daily articles. Features real-time topic filtering and a highly optimized backend.",
     keyPoint: "Real-time topic filtering across 10,000+ articles every day.",
     github: "https://github.com/mohans44/feedfocus",
-    live: "https://feedfocusnews.vercel.app/",
+    live: "https://feedfocused.vercel.app/",
     tech: ["MERN Stack", "TailwindCSS", "Cloudfare Workers AI"],
     screenshots: [feedFocus01, feedFocus02, feedFocus03, feedFocus04],
   },
   {
     name: "Job Finder",
     desc: "Full-featured job portal with application tracking and role-based dashboards. Secure and responsive.",
-    keyPoint: "Role-based dashboards with secure application tracking workflow.",
+    keyPoint:
+      "Role-based dashboards with secure application tracking workflow.",
     github: "https://github.com/mohans44/job-finder",
     live: "https://job-finder-web.web.app/",
     tech: ["React", "Firebase", "Chakra UI"],

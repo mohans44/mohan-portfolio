@@ -13,7 +13,7 @@ const BlogSection = () => {
           className="section-heading-wrap blog-heading"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
+          viewport={{ once: false, amount: 0.25 }}
           transition={{ duration: 0.5 }}
         >
           <p className="eyebrow dot-text">Blog</p>
@@ -31,7 +31,7 @@ const BlogSection = () => {
               className="blog-card"
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.15 }}
+              viewport={{ once: false, amount: 0.15 }}
               transition={{ duration: 0.45, delay: idx * 0.08 }}
               whileHover={{ y: -4 }}
             >

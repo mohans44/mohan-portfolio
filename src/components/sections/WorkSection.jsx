@@ -4,6 +4,18 @@ import { ArrowUpRight, ChevronLeft, ChevronRight, Github } from 'lucide-react';
 import { work } from '../../data/siteData';
 
 const MotionArticle = motion.article;
+const PANEL_REVEAL_INITIAL = {
+  opacity: 0,
+  scale: 0.992,
+};
+const PANEL_REVEAL_INVIEW = {
+  opacity: 1,
+  scale: 1,
+};
+const PANEL_REVEAL_TRANSITION = {
+  duration: 0.3,
+  ease: [0.22, 1, 0.36, 1],
+};
 const STICKY_COLORS = ['#ffd86f', '#8be9c4', '#9ec8ff', '#ffb4d0', '#cbb7ff', '#ffa373'];
 const STICKY_ANGLES = [-6, 5, -4, 7, -5, 6];
 const STICKY_BASE_POSITIONS = [
@@ -35,16 +47,28 @@ const buildInitialStickies = () =>
 const WorkPanel = ({ item, idx }) => {
   const [activeImage, setActiveImage] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(hover: none), (pointer: coarse)').matches : false,
+  );
   const slides = Array.isArray(item.screenshots) ? item.screenshots : [];
   const currentSlide = slides[activeImage] ?? slides[0] ?? null;
 
   useEffect(() => {
-    if (slides.length <= 1 || isPaused) return undefined;
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia('(hover: none), (pointer: coarse)');
+    const onChange = (event) => setIsTouchDevice(event.matches);
+    setIsTouchDevice(media.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1 || isPaused || isTouchDevice) return undefined;
     const timer = setInterval(() => {
       setActiveImage((prev) => (prev + 1) % slides.length);
-    }, 10000);
+    }, 5000);
     return () => clearInterval(timer);
-  }, [slides.length, isPaused]);
+  }, [slides.length, isPaused, isTouchDevice]);
 
   const goPrev = () => {
     setActiveImage((prev) => (prev - 1 + slides.length) % slides.length);
@@ -57,9 +81,10 @@ const WorkPanel = ({ item, idx }) => {
   return (
     <MotionArticle
       className="project-full-panel"
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      initial={PANEL_REVEAL_INITIAL}
+      whileInView={PANEL_REVEAL_INVIEW}
+      viewport={{ amount: 0.52, once: false }}
+      transition={{ ...PANEL_REVEAL_TRANSITION, delay: idx * 0.008 }}
     >
       <div className="container project-full-wrap">
         <div className="project-label-row">
@@ -82,10 +107,10 @@ const WorkPanel = ({ item, idx }) => {
                 alt={`${item.name} screen ${activeImage + 1}`}
                 loading="lazy"
                 decoding="async"
-                initial={{ opacity: 0, x: 26, scale: 0.985 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -24, scale: 1.005 }}
-                transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.32, ease: 'easeOut' }}
               />
             </AnimatePresence>
           )}
@@ -140,29 +165,33 @@ const randomTarget = () => ({
   y: 10 + Math.random() * 78,
 });
 
-const WorkOutroPanel = () => {
+const WorkOutroPanel = ({ revealGame }) => {
   const [gameState, setGameState] = useState('idle');
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
   const [target, setTarget] = useState(() => randomTarget());
   const [streak, setStreak] = useState(0);
+  const [showGame, setShowGame] = useState(false);
   const isPlaying = gameState === 'playing';
   const isEnded = gameState === 'ended';
 
   useEffect(() => {
     if (!isPlaying) return undefined;
-    if (timeLeft <= 0) {
-      setGameState('ended');
-      setBest((prev) => Math.max(prev, score));
-      return undefined;
-    }
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-      setStreak(0);
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setGameState('ended');
+          setBest((bestScore) => Math.max(bestScore, score));
+          setStreak(0);
+          return 0;
+        }
+        setStreak(0);
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, [isPlaying, timeLeft, score]);
+  }, [isPlaying, score]);
 
   const startGame = (countFirstHit = false) => {
     setTimeLeft(GAME_DURATION);
@@ -183,37 +212,68 @@ const WorkOutroPanel = () => {
     setTarget(randomTarget());
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowGame(revealGame);
+    }, revealGame ? 420 : 0);
+    return () => clearTimeout(timer);
+  }, [revealGame]);
+
   return (
     <MotionArticle
       className="work-outro-panel"
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      initial={PANEL_REVEAL_INITIAL}
+      whileInView={PANEL_REVEAL_INVIEW}
+      viewport={{ amount: 0.5, once: false }}
+      transition={PANEL_REVEAL_TRANSITION}
     >
       <div className="work-outro-wrap">
-        <div className="work-outro-head">
-          <h3 className="dot-text">PLAYGROUND</h3>
+        <div className={showGame ? 'work-outro-head is-visible' : 'work-outro-head is-hidden'}>
+          <h3 className={showGame ? 'dot-text playground-title is-live' : 'dot-text playground-title'}>
+            PLAYGROUND
+          </h3>
           <p className="work-outro-sub">Quick reflex challenge: hit the moving orb before time runs out.</p>
         </div>
 
         <div className="scroll-game">
-          <div className="scroll-game-stage" role="img" aria-label="Reflex game board">
-            <div className="scroll-game-hud">
-              <span>{isPlaying ? `Time: ${timeLeft}s` : 'Tap Orb to Start'}</span>
-              <span>Score: {score}</span>
-              <span>Best: {best}</span>
-              <span>Combo: x{Math.max(streak, 1)}</span>
-              {isEnded && <span>Round Complete</span>}
-            </div>
+          <AnimatePresence mode="wait">
+            {!showGame ? (
+              <motion.div
+                key="playground-locked"
+                className="scroll-game-blank"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              />
+            ) : (
+              <motion.div
+                key="playground-open"
+                className="scroll-game-live"
+                initial={{ opacity: 0, y: 20, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="scroll-game-stage" role="img" aria-label="Reflex game board">
+                  <div className="scroll-game-hud">
+                    <span>{isPlaying ? `Time: ${timeLeft}s` : 'Tap Orb to Start'}</span>
+                    <span>Score: {score}</span>
+                    <span>Best: {best}</span>
+                    <span>Combo: x{Math.max(streak, 1)}</span>
+                    {isEnded && <span>Round Complete</span>}
+                  </div>
 
-            <button
-              type="button"
-              className="game-target"
-              onClick={hitTarget}
-              style={{ '--target-x': `${target.x}%`, '--target-y': `${target.y}%` }}
-              aria-label="Hit target"
-            />
-          </div>
+                  <button
+                    type="button"
+                    className="game-target"
+                    onClick={hitTarget}
+                    style={{ '--target-x': `${target.x}%`, '--target-y': `${target.y}%` }}
+                    aria-label="Hit target"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </MotionArticle>
@@ -222,6 +282,13 @@ const WorkOutroPanel = () => {
 
 const WorkSection = () => {
   const [stickies, setStickies] = useState(() => buildInitialStickies());
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 1025px)').matches : true,
+  );
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false,
+  );
+  const [playgroundUnlocked, setPlaygroundUnlocked] = useState(() => !isDesktop);
   const panelRef = useRef(null);
   const dragRef = useRef({
     stickyId: null,
@@ -234,7 +301,7 @@ const WorkSection = () => {
 
   const onStickyPointerDown = (event, sticky) => {
     event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
+    event.currentTarget.setPointerCapture?.(event.pointerId);
     dragRef.current = {
       stickyId: sticky.id,
       pointerId: event.pointerId,
@@ -247,7 +314,8 @@ const WorkSection = () => {
 
   const onStickyPointerMove = (event) => {
     const { stickyId, pointerId, startX, startY, originX, originY } = dragRef.current;
-    if (!stickyId || pointerId !== event.pointerId || !panelRef.current) return;
+    if (!stickyId || !panelRef.current) return;
+    if (pointerId !== null && event.pointerId !== pointerId) return;
 
     const rect = panelRef.current.getBoundingClientRect();
     const maxX = Math.max(92, rect.width / 2 - 120);
@@ -258,10 +326,7 @@ const WorkSection = () => {
     setStickies((prev) => prev.map((sticky) => (sticky.id === stickyId ? { ...sticky, x: nextX, y: nextY } : sticky)));
   };
 
-  const onStickyPointerUp = (event) => {
-    const { pointerId } = dragRef.current;
-    if (pointerId !== event.pointerId) return;
-    event.currentTarget.releasePointerCapture(event.pointerId);
+  const onStickyPointerUp = () => {
     dragRef.current = {
       stickyId: null,
       pointerId: null,
@@ -272,10 +337,68 @@ const WorkSection = () => {
     };
   };
 
+  useEffect(() => {
+    const handlePointerMove = (event) => onStickyPointerMove(event);
+    const handlePointerUp = () => onStickyPointerUp();
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia('(min-width: 1025px)');
+    const onChange = (event) => setIsDesktop(event.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const media = window.matchMedia('(max-width: 768px)');
+    const onChange = (event) => setIsMobile(event.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) {
+      const id = window.requestAnimationFrame(() => setPlaygroundUnlocked(true));
+      return () => window.cancelAnimationFrame(id);
+    }
+    const scrollRoot = panelRef.current?.closest('.projects-page-view');
+    if (!scrollRoot) {
+      const id = window.requestAnimationFrame(() => setPlaygroundUnlocked(false));
+      return () => window.cancelAnimationFrame(id);
+    }
+    const unlockWhenDoneScrolling = () => {
+      const atBottom = scrollRoot.scrollTop + scrollRoot.clientHeight >= scrollRoot.scrollHeight - 8;
+      setPlaygroundUnlocked(atBottom);
+    };
+
+    unlockWhenDoneScrolling();
+    scrollRoot.addEventListener('scroll', unlockWhenDoneScrolling, { passive: true });
+    return () => scrollRoot.removeEventListener('scroll', unlockWhenDoneScrolling);
+  }, [isDesktop]);
+
   return (
     <section id="work" className="projects-modern">
-      <div className="work-intro-panel" ref={panelRef}>
-        <div className="work-stickies-layer" onPointerMove={onStickyPointerMove} onPointerUp={onStickyPointerUp}>
+      <motion.div
+        className="work-intro-panel"
+        ref={panelRef}
+        initial={PANEL_REVEAL_INITIAL}
+        whileInView={PANEL_REVEAL_INVIEW}
+        viewport={{ amount: 0.5, once: false }}
+        transition={PANEL_REVEAL_TRANSITION}
+      >
+        <div className="work-stickies-layer">
           {stickies.map((sticky) => (
             <button
               key={sticky.id}
@@ -300,11 +423,11 @@ const WorkSection = () => {
           <span className="work-scroll-text">Scroll for Work</span>
           <span className="work-scroll-arrow">↓</span>
         </div>
-      </div>
+      </motion.div>
       {work.map((item, idx) => (
         <WorkPanel key={item.name} item={item} idx={idx} />
       ))}
-      <WorkOutroPanel />
+      {!isMobile && <WorkOutroPanel revealGame={playgroundUnlocked} />}
     </section>
   );
 };
